@@ -6,6 +6,7 @@ export default class Callback extends React.Component {
   constructor(props) {
     super();
     this.state = { 
+      id_token: undefined,
       data: [],
       window: undefined
     };
@@ -33,10 +34,34 @@ export default class Callback extends React.Component {
         body: `id_token=${json.id_token}&client_id=1654045933`
       });
       const person = await personal_data.json()
+
       // 3. personal data from LINE login
       sessionStorage.setItem("person", JSON.stringify(person))
+      sessionStorage.setItem("json", JSON.stringify(json))
       console.log("personal_data in componentDidMount: ", person)
-      this.setState({ data: person });
+      this.setState({ data: person, id_token: json.id_token });
+
+      // 4a. validate ID token
+      let base64Url = json.id_token.split('.')[1]; // json.id_token you get
+      let base64 = base64Url.replace('-', '+').replace('_', '/');
+      let decodedData = JSON.parse(Buffer.from(base64, 'base64').toString('binary'));
+      console.log("decodedData: ", decodedData)
+
+
+      // 4b. validate ID token
+      console.log("decodedData: ", parseJwt(json.id_token))
+
+      function parseJwt (token) {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        return JSON.parse(jsonPayload);
+      };
+
+
     }
   }
 
@@ -46,6 +71,7 @@ export default class Callback extends React.Component {
 
       console.log("this.state.data: ", personal_data)
       console.log("this.state.data: ", this.state.data)
+      console.log("json: ", JSON.parse(sessionStorage.getItem("json")))
 
       return(
         <>
