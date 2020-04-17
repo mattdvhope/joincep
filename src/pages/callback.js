@@ -47,6 +47,7 @@ export default class Callback extends React.Component {
       let decodedData = JSON.parse(Buffer.from(base64, 'base64').toString('binary'));
       console.log("decodedData: ", decodedData)
 
+      console.log("validated????: ", person === decodedData)
 
       // 4b. validate ID token
       console.log("decodedData: ", parseJwt(json.id_token))
